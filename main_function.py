@@ -3,6 +3,7 @@
 import nibabel as nib
 import nrrd
 import numpy as np
+import shutil
 # import dicom2nifti
 #
 # if __name__ == '__main__':
@@ -33,6 +34,26 @@ def convert_to_nifti(dicom_directory, nifti_directory):
         return
 
     for root, dirs, files in os.walk(dicom_directory):
+        if any(file.endswith(('.nii')) for file in files):
+            for file in files:
+                if file.endswith('nii') == True:
+                    output_file = os.path.join(nifti_directory, os.path.relpath(root, dicom_directory),
+                                               os.path.splitext(file)[0] + '.nii')
+                    try:
+                        try:
+                            os.makedirs(os.path.join(nifti_directory, os.path.relpath(root, dicom_directory)),
+                                        exist_ok=True)
+                        except Exception as e:
+                            print(f"An error occurred while creating the output directory: {e}")
+                            return
+                        try:
+                            shutil.move(os.path.join(root, file), output_file)
+                            print(f"Moved {root} to {output_file}")
+                        except Exception as e:
+                            print(f"An error occurred while moving {root}: {e}")
+                    except Exception as e:
+                        print(f"An error occurred while converting files in {root}: {e}")
+
         if any(file.endswith(('.dcm')) for file in files):
             output_file = os.path.join(nifti_directory, os.path.relpath(root, dicom_directory))
             try:
@@ -90,7 +111,7 @@ def convert_to_nifti(dicom_directory, nifti_directory):
 
 
 if __name__ == '__main__':
-    main_directory = '/Users/arthurlefebvre/Downloads/UU_P4_Pre'
-    nifti_output_directory = '/Users/arthurlefebvre/Downloads/UU_P4_Pre_bis'
+    main_directory = '/Users/arthurlefebvre/Desktop/data/CTs/new/test'
+    nifti_output_directory = '/Users/arthurlefebvre/Desktop/data/CTs/orig_data/test_nii'
 
     convert_to_nifti(main_directory, nifti_output_directory)
